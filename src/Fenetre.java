@@ -1,304 +1,352 @@
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.List;
-import javax.swing.border.LineBorder;
-
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.LineBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.MaskFormatter;
 import javax.swing.JOptionPane;
-
+import static java.awt.Color.green;
 import static java.lang.Integer.parseInt;
 import static javax.swing.JOptionPane.*;
 
 public class Fenetre extends JFrame {
-    JFrame frame;
-    JPanel panel = new JPanel();
-JLabel axiome = new JLabel("Axiome :");
-    JLabel NBR = new JLabel("Nombre d'itération :");
-    JLabel resultatL = new JLabel("Résulat :");
 
-    int indexer = 1;
- JTextArea result = new JTextArea(24, 24);
- ArrayList<JTextField> listDesClee = new ArrayList<JTextField>();
-    ArrayList<JTextField> listDesChaines = new ArrayList<JTextField>();
-
+    private JPanel panneauRegles = new JPanel ();
+    private int indexer = 1;
+    private JTextArea AffResultat;
+    private ArrayList<JTextField> listDesClee = new ArrayList<> ();
+    private ArrayList<JTextField> listDesChaines = new ArrayList<> ();
 
     public Fenetre() {
-        this.frame = new JFrame();
-        this.setTitle("L-Système");
-        this.setSize(700, 700);
-        this.setLocationRelativeTo(null);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLayout(new GridBagLayout());
+        this.setTitle ("L-Système");
+        this.setSize (625, 600);
+        this.setLocationRelativeTo (null);
+        this.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+        this.setLayout (new GridBagLayout());
+        this.setResizable(false);
 
-        // Frame constraints
-        GridBagConstraints contrainteCadre = new GridBagConstraints();
+        // Contrainte pour le cadre principal. Il s'agit du gros bloc dans lequel tout les autres blocs
+        // seront situé
+        GridBagConstraints contrainteCadre = new GridBagConstraints ();
 
-
-
-        JButton ajouter = new JButton("Ajouter");
-        ajouter.addActionListener((ActionEvent e) -> {
-
-            // Clear panel
-            panel.removeAll();
-
-            // Create label and text field
-            JTextField regleUtil = new JTextField();
-            regleUtil.setSize(100, 200);
+        // Bouton pour ajouter des éléments.
+        JButton ajouter = new JButton ("Ajouter");
+        ajouter.addActionListener (this::actionPerformedAjouter);
 
 
-            JTextField cleeUtil = new JTextField();
-            cleeUtil.setSize(60, 60);
+        // bouton pour supprimer des éléments.
+        JButton supprimer = new JButton ("Supprimer");
+        supprimer.addActionListener (this::actionPerformSupprimer);
 
-            listDesChaines.add(regleUtil);
-            listDesClee.add(cleeUtil);
-
-            // Create constraints
-            GridBagConstraints textFieldConstraints = new GridBagConstraints();
-            GridBagConstraints labelConstraints = new GridBagConstraints();
-
-
-            // Add labels and text fields
-            for (int i = 0; i < indexer; i++) {
-                // Text field constraints
-                textFieldConstraints.gridx = 1;
-
-                textFieldConstraints.fill = GridBagConstraints.HORIZONTAL;
-                textFieldConstraints.weightx = 0.5;
-                textFieldConstraints.insets = new Insets(5, 5, 5, 5);
-                textFieldConstraints.gridy = i;
-
-                // Label constraints
-                labelConstraints.gridx = 0;
-                labelConstraints.fill = GridBagConstraints.HORIZONTAL;
-                labelConstraints.weightx = 0.1;
-                labelConstraints.insets = new Insets(5, 5, 5, 5);
-                labelConstraints.gridy = i;
-
-                // Add them to panel
-                panel.add(listDesChaines.get(i), textFieldConstraints);
-                panel.add(listDesClee.get(i), labelConstraints);
-            }
-
-            // Align components top-to-bottom
-            GridBagConstraints c = new GridBagConstraints();
-            c.gridx = 0;
-            c.gridy = indexer;
-            c.weighty = 1;
-            panel.add(new JLabel(), c);
-
-            // Increment indexer
-            indexer++;
-            panel.updateUI();
-
-
-        });
-
-
-
-        JButton supprimer = new JButton("Supprimer");
-        supprimer.addActionListener(e -> {
-            panel.remove(listDesChaines.get(listDesChaines.size() - 1));
-            panel.remove(listDesClee.get(listDesClee.size() - 1));
-
-            listDesChaines.remove(listDesChaines.size() - 1);
-            listDesClee.remove(listDesClee.size() - 1);
-
-            indexer--;
-
-            panel.updateUI();
-        });
-
-        JPanel boutonp = new JPanel(new FlowLayout());
-
-
-        boutonp.add(ajouter, 0);
-        boutonp.add(supprimer, 1);
-
+        // Afficahge des boutons ajouter et supprimer.
+        JPanel affBouton = new JPanel (new FlowLayout ());
+        affBouton.add (ajouter, 0);
+        affBouton.add (supprimer, 1);
         contrainteCadre.gridx = 0;
         contrainteCadre.gridy = 3;
         contrainteCadre.weightx = 0;
+        this.add (affBouton, contrainteCadre);
 
-        this.add(boutonp, contrainteCadre);
+        // Contruction du panneau principal qui va contenir les règles.
+        panneauRegles.setPreferredSize (new Dimension (300, 400));
+        panneauRegles.setLayout (new GridBagLayout ());
+        panneauRegles.setBackground (Color.orange);
+        panneauRegles.setBorder (LineBorder.createBlackLineBorder ());
 
-        // Construct panel
-        panel.setPreferredSize(new Dimension(300, 400));
-        panel.setLayout(new GridBagLayout());
-        panel.setBorder(LineBorder.createBlackLineBorder());
 
-        // Add panel to frame
+        // Ajout du panneauRegles au panneau principal
         contrainteCadre.gridx = 0;
         contrainteCadre.gridy = 1;
         contrainteCadre.weighty = 0;
-
-        this.add(panel, contrainteCadre);
-
-
-        JPanel resultat = new JPanel();
-        resultat.setPreferredSize(new Dimension(300, 400));
-        resultat.setBorder(LineBorder.createBlackLineBorder());
-        result.setLineWrap(true);
-        result.setWrapStyleWord(true);
-        JScrollPane jsp = new JScrollPane(result);
-        resultat.add(jsp);
+        this.add (panneauRegles, contrainteCadre);
 
 
+        // Ajout du panneau resultat.
+        JPanel resultat = new JPanel ();
+        resultat.setPreferredSize (new Dimension (300, 400));
+        resultat.setBorder (LineBorder.createBlackLineBorder ());
+        resultat.setBackground (Color.cyan);
+
+        // Ajout de la partie ou vont s'imprimer les résultat dans le panneau.
+        AffResultat = new JTextArea (24, 24);
+        AffResultat.setLineWrap (true);
+        AffResultat.setWrapStyleWord (true);
+        AffResultat.setBackground (Color.cyan);
+        JScrollPane jsp = new JScrollPane (AffResultat);
+        jsp.setBorder (null);
+        resultat.add (jsp);
+
+        // On ajoute le tout au panneau principal.
         contrainteCadre.gridx = 1;
         contrainteCadre.gridy = 1;
         contrainteCadre.weighty = 0;
+        this.add (resultat, contrainteCadre);
 
-        this.add(resultat, contrainteCadre);
 
 
+        // Panneau avec les instruction de basse ( nombre d'itration et axiome depart).
+        JPanel depart = new JPanel (new GridLayout (3, 2));
+
+        JTextField axiomeEntre = new JTextField ();
+        JFormattedTextField NBRAxiomeText = new JFormattedTextField (NumberFormat.getIntegerInstance ());
+
+        // Écoute le clavier pour appliqué immédiatement les modifications au texte pour qu'il soit comforme
+        // au condition. (Pas d'espace)
+        axiomeEntre.addKeyListener (new KeyListener () {
+            @Override
+            public void keyTyped(KeyEvent e) { }
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode () == KeyEvent.VK_PASTE) {
+                    axiomeEntre.setText (axiomeEntre.getText ().replaceAll ("\\s+", ""));
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyChar () == ' ') {
+                    axiomeEntre.setText (axiomeEntre.getText ().replace (String.valueOf (e.getKeyChar ()), ""));
+                }
+            }
+        });
+
+        // Affichage des éléments de départs.
+        NBRAxiomeText.setPreferredSize (new Dimension (100, 20));
+        JLabel axiomeEtiquette = new JLabel ("Axiome :");
+        depart.add (axiomeEtiquette, 0);
+        depart.add (axiomeEntre, 1);
+        JLabel NBREtiquette = new JLabel ("Nombre d'itération :");
+        depart.add (NBREtiquette, 2);
+        depart.add (NBRAxiomeText, 3);
+
+        // On ajoute le tout au panneau principal.
         contrainteCadre.gridx = 1;
         contrainteCadre.gridy = 0;
         contrainteCadre.weighty = 0;
-
-        JPanel demarer = new JPanel(new GridLayout(3, 2));
-
-
-        JTextField axiomeEntre = new JTextField();
-        JFormattedTextField NbrAxiome = new JFormattedTextField(NumberFormat.getIntegerInstance());
+        this.add (depart, contrainteCadre);
 
 
+        // Boutom qui permet de mettre en action le programe et qui valide les entrés.
+        JButton interpreter = new JButton ("Interpreter");
+        interpreter.addActionListener (e -> SwingUtilities.invokeLater (() -> {
 
-        NbrAxiome.setPreferredSize(new Dimension(100, 20));
-        demarer.add(axiome, 0);
-        demarer.add(axiomeEntre, 1);
-        demarer.add(NBR, 2);
-        demarer.add(NbrAxiome, 3);
+            // Variable pour lancer la verifivation et construire le L-Systeme.
+            ArrayList<Regle> data = new ArrayList<> ();
+            String axiomeDepart = axiomeEntre.getText ();
+            int NBAxiome = 0;
+            boolean estValide = true;
 
-        this.add(demarer, contrainteCadre);
-
-
-
-
-
-        JButton interpreter = new JButton("Interpreter");
-        interpreter.addActionListener(e -> {
-
-
-
-
-
-
-            ArrayList<Regle> data = new ArrayList<>();
-
-            if(listDesClee.size() == listDesChaines.size()) {
-                for (int i = 0; i < listDesClee.size(); i++) {
-                    String temp1;
-                    String temp2;
-
-                    char temp11;
-                    boolean copie = false;
-
-                    temp1=listDesClee.get(i).getText().trim().toUpperCase();
-                    temp2=listDesChaines.get(i).getText().replaceAll("\\s+","").toUpperCase();
-
-
-                    JTextField temp3 = new JTextField(temp2);
-                     listDesChaines.set(i,temp3);
-
-                     JTextField temp4 = new JTextField(temp1);
-                     listDesClee.set(i,temp4);
-
-                     temp11 = temp1.charAt(0);
-
-
-                    for(int y =0; y<data.size();++y){
-                        if(temp11 == data.get(y).clee){
-                            copie = true;
-                        }
-
-                    }
-                    if(temp1.length() != 1){
-                        showMessageDialog(null, "Vous Devez Entrer qu'une seul Lettre dans la Clé.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    }else if( copie) {
-                        showMessageDialog(null, "Vous Devez Entrer qu'une seul règle PAR CLÉE.", "Erreur", JOptionPane.ERROR_MESSAGE);
-
-                    }else{
-                        data.add(new Regle(temp11,temp2));
-
-                    }
-
-
-
-
-
-
+            // On essaie de prendre le chiffre dans le nombre d'itération de départ. Et on vérifie s'il n'est pas 0.
+            try {
+                NBAxiome = parseInt (NBRAxiomeText.getText ());
+                if (NBAxiome <= 0) {
+                    throw new NumberFormatException ();
                 }
+
+                if (listDesClee.size () == listDesChaines.size ()) {
+                    for (int i = 0; i < listDesClee.size (); i++) {
+                        boolean copie = false;
+
+                        try {
+                            char clee = listDesClee.get (i).getText ().charAt (0);
+
+                            String chaine = listDesChaines.get (i).getText ();
+
+                            for (Regle aData : data) {
+                                if (clee == aData.clee) {
+                                    copie = true;
+                                }
+                            }
+                            if (copie) {
+                                estValide = false;
+                                showMessageDialog (null,
+                                        "Vous Devez Entrer qu'une seul règle PAR CLÉE. " +
+                                                "Les doublons sont interdi!",
+                                        "Erreur", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                data.add (new Regle (clee, chaine));
+                            }
+                        } catch (StringIndexOutOfBoundsException t1) {
+                            estValide = false;
+                            showMessageDialog (null,
+                                    "Vous Devez Entrer 1 Amoxiome par clées",
+                                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } else {
+                    showMessageDialog (null, "ERREUR FATAL",
+                            "Erreur Fatal", JOptionPane.ERROR_MESSAGE);
+                    System.exit (1);
+                }
+                if (axiomeDepart.length () <= 0) {
+                    estValide = false;
+                    showMessageDialog (null,
+                            "AXIOME invalide, il doit y avoir au moins 1 amoxiome de depart.",
+                            "Erreur Amoxiome", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException t2) {
+                estValide = false;
+                showMessageDialog (null,
+                        "Nombre d'itération invalide, il doit être plus grand que 0.",
+                        "Erreur NBREtiquette. Itération", JOptionPane.ERROR_MESSAGE);
             }
 
-            LSystem L = new LSystem();
-
-          for (int z =0; z<data.size();++z){
-
-                L.ajouterRegle(data.get(z).clee,data.get(z).chaine);
-
+            if (estValide) {
+                Fenetre.this.affichage (data, NBAxiome, axiomeDepart);
             }
 
-            String n = axiomeEntre.getText().replaceAll("\\s+","").toUpperCase();
+        }));
 
-
-            int NBT = parseInt(NbrAxiome.getText());
-
-
-
-            if(n.length() <=0) {
-                showMessageDialog(null, "AXIOME invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
-
-            }else if( !(NBT >= 0) ){
-                showMessageDialog(null, "NOMBRE invalide.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            }else{
-
-
-                result.append(L.apply(NBT,n));
-
-            }
-
-
-            panel.updateUI();
-
-
-
-        });
-
-        JPanel inter = new JPanel();
-        inter.add(interpreter);
+        // Partie qui affiche le bouton interprété
+        JPanel inter = new JPanel ();
+        inter.add (interpreter);
         contrainteCadre.gridx = 1;
         contrainteCadre.gridy = 3;
         contrainteCadre.weighty = 0;
-        this.add(inter, contrainteCadre);
+        this.add (inter, contrainteCadre);
 
-        panel.updateUI();
-
-        this.setVisible(true);
-
+        panneauRegles.revalidate ();
+        this.setVisible (true);
     }
 
+    private void affichage(ArrayList<Regle> data, int NBD, String axiome) {
+        AffResultat.removeAll ();
+        AffResultat.setText (null);
+
+        LSystem L = new LSystem ();
+
+        for (Regle x : data) {
+            L.ajouterRegle (x.clee, x.chaine);
+        }
+
+        // On affiche et on valide les résultats
+        AffResultat.append (L.apply (NBD, axiome));
+        panneauRegles.revalidate ();
+        panneauRegles.repaint ();
+    }
+
+    private void actionPerformedAjouter(ActionEvent e) {
+        SwingUtilities.invokeLater (() -> {
+
+            // On refait tout le panneau à chaque fois.
+            panneauRegles.removeAll ();
+
+            // Création des JTextField pour les chaines et clées.
+            JTextField regleUtil = new JTextField ();
+            regleUtil.setSize (100, 200);
+            regleUtil.setBackground (Color.green);
+            regleUtil.addKeyListener (new KeyListener () {
+                @Override
+                public void keyTyped(KeyEvent e1) { }
+
+                @Override
+                public void keyPressed(KeyEvent e1) { }
+
+                @Override
+                public void keyReleased(KeyEvent e1) {
+                    if (e1.getKeyChar () == ' ') {
+                        regleUtil.setText (regleUtil.getText ().replace (String.valueOf (e1.getKeyChar ()), ""));
+                    }
+                }
+            });
+
+            // On Crée les champs qui s'occupe de la clée.
+            JTextField cleeUtil = new JTextField ();
+            cleeUtil.setSize (60, 60);
+            cleeUtil.setBackground (Color.green);
+            cleeUtil.addMouseListener (new MouseAdapter () {
+                @Override
+                public void mouseClicked(MouseEvent e1) {
+                    cleeUtil.setText ("");
+                }
+            });
+
+            cleeUtil.addKeyListener (new KeyListener () {
+                @Override
+                public void keyTyped(KeyEvent e1) {
+
+                    if (cleeUtil.getText ().length () > 0) {
+                        e1.consume ();
+                    }
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e1) { }
+
+                @Override
+                public void keyReleased(KeyEvent e1) {
+                    if (e1.getKeyChar () == ' ') {
+                        cleeUtil.setText (cleeUtil.getText ().replace (String.valueOf (e1.getKeyChar ()), ""));
+                    }
+                }
+            });
+            listDesChaines.add (regleUtil);
+            listDesClee.add (cleeUtil);
+
+            // Création des contraintes pour les JTextField
+            GridBagConstraints contrainteChaine = new GridBagConstraints ();
+            GridBagConstraints ContrainteClee = new GridBagConstraints ();
+
+
+            // On ajoute les JtextField pour les clee et les chaines.
+            for (int i = 0; i < indexer; i++) {
+
+                contrainteChaine.gridx = 1;
+                contrainteChaine.fill = GridBagConstraints.HORIZONTAL;
+                contrainteChaine.weightx = 0.5;
+                contrainteChaine.insets = new Insets (5, 5, 5, 5);
+                contrainteChaine.gridy = i;
+
+                ContrainteClee.gridx = 0;
+                ContrainteClee.fill = GridBagConstraints.HORIZONTAL;
+                ContrainteClee.weightx = 0.1;
+                ContrainteClee.insets = new Insets (5, 5, 5, 5);
+                ContrainteClee.gridy = i;
+
+                // On ajoute le tout au panneau.
+                panneauRegles.add (listDesChaines.get (i), contrainteChaine);
+                panneauRegles.add (listDesClee.get (i), ContrainteClee);
+            }
+            // Pour enliger le programme de haut en bas.
+            GridBagConstraints p = new GridBagConstraints ();
+            p.gridx = 0;
+            p.gridy = indexer;
+            p.weighty = 1;
+            panneauRegles.add (new JLabel (), p);
+
+            // Tenir le compte de où on est on utilise l'indexer
+            indexer++;
+
+            // On actualise le tout.
+            panneauRegles.updateUI ();
+            panneauRegles.revalidate ();
+            panneauRegles.repaint ();
+        });
+    }
+
+    private void actionPerformSupprimer(ActionEvent e) {
+        SwingUtilities.invokeLater (() -> {
+            panneauRegles.remove (listDesChaines.get (listDesChaines.size () - 1));
+            panneauRegles.remove (listDesClee.get (listDesClee.size () - 1));
+
+            listDesChaines.remove (listDesChaines.size () - 1);
+            listDesClee.remove (listDesClee.size () - 1);
+
+            indexer--;
+            panneauRegles.updateUI ();
+            panneauRegles.revalidate ();
+            panneauRegles.repaint ();
+        });
+    }
 }
-
-
 
 
 
